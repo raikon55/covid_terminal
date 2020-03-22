@@ -26,8 +26,8 @@ json2array() {
 print_data() {
     local _date=$(date +"%d/%m/%Y %H:%M")
     echo -n "
-Dados referentes ao país ${_data[displayName]}
-em ${_date}:
+Dados referentes a ${_data[displayName]}
+em ${_date}
 ===============================================
 Número de casos: ${_data[totalConfirmed]}
 Total de mortes: ${_data[totalDeaths]}
@@ -35,6 +35,29 @@ Pessoas recuperadas: ${_data[totalRecovered]}
 
 "
 
+}
+
+options() {
+    case "$1" in
+        "--help"|"-h")
+            echo -n "
+Esse programa tem como objetivo fornecer dados da atual
+pandemia do vírus SARS-COV-2 (Coronavírus).
+"
+        ;;
+
+        "--country"|"-c")
+            # Mostrar informação sobre um país especifico
+        ;;
+
+        "--world"|"-w")
+            # Mostrar informação do mundo todo
+        ;;
+
+        *)
+            printf "Algo saiu errado"
+        ;;
+    esac
 }
 
 main() {
