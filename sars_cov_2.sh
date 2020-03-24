@@ -9,8 +9,10 @@
 #####
 
 readonly _API_URL='https://www.bing.com/covid/data?IG=56334BDE95D545AFAA8E6066C8AA674F'
+readonly _JSON=$(curl --silent "${_API_URL}")
 
 declare -A _data
+declare -A _countries
 
 json2array() {
     local _json_data="${1%%,}}"
@@ -37,17 +39,36 @@ Pessoas recuperadas: ${_data[totalRecovered]}
 
 }
 
+print_countries() {
+    local _countries=$(grep -o -E '"id"\:"[a-z]+"' <<<"$_JSON" | sed 's/"id"\://')
+
+    while IFS== read -r _key _value
+    do
+        _countries[$_key]="$_value"
+    done <<"$_countries"
+
+    echo $_countries
+}
+
 options() {
     case "$1" in
         "--help"|"-h")
             echo -n "
-Esse programa tem como objetivo fornecer dados da atual
-pandemia do vírus SARS-COV-2 (Coronavírus).
+Esse programa tem como objetivo fornecer dados da
+pandemia do vírus SARS-COV-2 (COVID-19).
 "
+            exit 1
+        ;;
+
+        "--list"|"-l")
+            shift
+            print_countries
         ;;
 
         "--country"|"-c")
-            # Mostrar informação sobre um país especifico
+            shift
+            json2array "$1"
+            print_data
         ;;
 
         "--world"|"-w")
@@ -56,24 +77,23 @@ pandemia do vírus SARS-COV-2 (Coronavírus).
 
         *)
             printf "Algo saiu errado"
+            exit 1
         ;;
     esac
 }
 
 main() {
-    local _json _regex
+    local _regex
 
     _regex="\{\"id\"\:\"${1}[a-zA-Z0-9\",:]{1,}\[\][a-zA-Z0-9\",:]{1,},"
 
-    _json=$(curl --silent "${_API_URL}" | grep -o -E "$_regex")
-
-    if ! json2array "$_json"
+    if [[ $(jq empty <<< "$_JSON") ]]
     then
         printf "ERRO: Falha em obter os dados de $_API_URL">&2
         exit 1
+    else
+        options "$@"
     fi
-
-    print_data
 }
 
-main "$1"
+main "$@"
