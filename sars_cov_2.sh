@@ -5,49 +5,52 @@
 ## Busca e exibe na tela dados sobre o virus SARS-COV-2 (COVID-19)
 ##
 ## Eduardo Lopes
-## Versão 0.1
+## Versão 0.3
 #####
 
-readonly _API_URL='https://www.bing.com/covid/data?IG=56334BDE95D545AFAA8E6066C8AA674F'
-readonly _JSON=$(curl --silent "${_API_URL}")
+readonly _RED='\033[1;31m'
+readonly _BLUE='\033[1;34m'
+readonly _GREEN='\033[1;32m'
+readonly _CLEAN='\033[0m'
+
+readonly _API_URL='https://corona.lmao.ninja'
+readonly _date=$(date +"%d/%m/%Y %H:%M")
 
 declare -A _data
-declare -A _countries
 
 json2array() {
-    local _json_data="${1%%,}}"
+    readonly _JSON=$(curl --silent "${_API_URL}/$1")
 
-    jq empty <<<"$_json_data" 2>/dev/null || return 1
+    jq empty <<<"$_JSON" 2>/dev/null || return 1
 
     while IFS== read -r _key _value
     do
         _data[$_key]="$_value"
-    done < <(jq -r '.|to_entries|.[]|.key+"="+(.value|tostring)' <<<"$_json_data")
+    done < <(jq -r '.|to_entries|.[]|.key+"="+(.value|tostring)' <<<"$_JSON")
 }
 
-print_data() {
-    local _date=$(date +"%d/%m/%Y %H:%M")
-    echo -n "
-Dados referentes a ${_data[displayName]}
-em ${_date}
+print_country() {
+    echo -e -n "
+Dados referentes a ${_data[country]} em ${_date}
 ===============================================
-Número de casos: ${_data[totalConfirmed]}
-Total de mortes: ${_data[totalDeaths]}
-Pessoas recuperadas: ${_data[totalRecovered]}
+Casos hoje:          $_BLUE${_data[todayCases]}$_CLEAN
+Número de casos:     $_BLUE${_data[cases]}$_CLEAN
+Mortes hoje:         $_RED${_data[todayDeaths]}$_CLEAN
+Total de mortes:     $_RED${_data[deaths]}$_CLEAN
+Pessoas recuperadas: $_GREEN${_data[recovered]}$_CLEAN
 
 "
-
 }
 
-print_countries() {
-    local _countries=$(grep -o -E '"id"\:"[a-z]+"' <<<"$_JSON" | sed 's/"id"\://')
+print_world() {
+    echo -e -n "
+Dados referentes ao mundo em ${_date}
+===============================================
+Número de casos:     $_BLUE${_data[cases]}$_CLEAN
+Total de mortes :    $_RED${_data[deaths]}$_CLEAN
+Pessoas recuperadas: $_GREEN${_data[recovered]}$_CLEAN
 
-    while IFS== read -r _key _value
-    do
-        _countries[$_key]="$_value"
-    done <<"$_countries"
-
-    echo $_countries
+"
 }
 
 options() {
@@ -60,19 +63,15 @@ pandemia do vírus SARS-COV-2 (COVID-19).
             exit 1
         ;;
 
-        "--list"|"-l")
-            shift
-            print_countries
+        "--world"|"-w")
+            json2array "all"
+            print_world
         ;;
 
         "--country"|"-c")
             shift
-            json2array "$1"
-            print_data
-        ;;
-
-        "--world"|"-w")
-            # Mostrar informação do mundo todo
+            json2array "countries/$1"
+            print_country
         ;;
 
         *)
@@ -82,18 +81,4 @@ pandemia do vírus SARS-COV-2 (COVID-19).
     esac
 }
 
-main() {
-    local _regex
-
-    _regex="\{\"id\"\:\"${1}[a-zA-Z0-9\",:]{1,}\[\][a-zA-Z0-9\",:]{1,},"
-
-    if [[ $(jq empty <<< "$_JSON") ]]
-    then
-        printf "ERRO: Falha em obter os dados de $_API_URL">&2
-        exit 1
-    else
-        options "$@"
-    fi
-}
-
-main "$@"
+options "$@"
