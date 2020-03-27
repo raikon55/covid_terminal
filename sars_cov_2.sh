@@ -5,7 +5,7 @@
 ## Busca e exibe na tela dados sobre o virus SARS-COV-2 (COVID-19)
 ##
 ## Eduardo Lopes
-## Versão 0.3
+## Versão 0.4
 #####
 
 readonly _RED='\033[1;31m'
@@ -53,13 +53,32 @@ Pessoas recuperadas: $_GREEN${_data[recovered]}$_CLEAN
 "
 }
 
+list_countries() {
+    local readonly _countries=$(curl --silent "${_API_URL}/countries" | jq ".|.[]|.country" | grep -o -E "[^\"]+")
+
+    echo "$_countries"
+}
+
+help() {
+    echo -n -e "
+Esse script tem o objetivo informar sobre o a pandemia da COVID-19,
+causada pelo coronavirus Sars-Cov-2, que surgiu em 12/2019 na China.
+
+Modo de uso:
+    --help|-h -> Exibe esse menu com informações sobre o programa
+    --country|-c $_BLUE<país>$_CLEAN -> Exibe informações sobre um país especifíco
+    --world|-w -> Exibe informações globais
+    --list|-l -> Lista os países que é possível consultar
+"
+}
+
 options() {
+
+    [[ -z "$1" ]] && { help; exit 1; }
+
     case "$1" in
         "--help"|"-h")
-            echo -n "
-Esse programa tem como objetivo fornecer dados da
-pandemia do vírus SARS-COV-2 (COVID-19).
-"
+            help
             exit 1
         ;;
 
@@ -74,8 +93,13 @@ pandemia do vírus SARS-COV-2 (COVID-19).
             print_country
         ;;
 
+        "--list"|"-l")
+            list_countries
+        ;;
+
         *)
-            printf "Algo saiu errado"
+            printf "$_REDÉ necessário informar argumentos válidos$_CLEAN"
+            help
             exit 1
         ;;
     esac
