@@ -63,12 +63,15 @@ help() {
     echo -n -e "
 Esse script tem o objetivo informar sobre o a pandemia da COVID-19,
 causada pelo coronavirus Sars-Cov-2, que surgiu em 12/2019 na China.
+Para informações sobre o a fammília de vírus coronavírus, consulte: https://bit.ly/2V1sMnE
 
 Modo de uso:
-    --help|-h -> Exibe esse menu com informações sobre o programa
-    --country|-c $_BLUE<país>$_CLEAN -> Exibe informações sobre um país especifíco
-    --world|-w -> Exibe informações globais
-    --list|-l -> Lista os países que é possível consultar
+    sars_cov_2 <opções> [parametros]
+
+    -h | --help -> Exibe esse menu com informações sobre o programa
+    -c | --country <país> -> Exibe informações sobre um país especifíco
+    -w | --world -> Exibe informações globais
+    -l | --list -> Lista os países que é possível consultar
 "
 }
 
