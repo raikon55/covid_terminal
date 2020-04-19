@@ -13,7 +13,7 @@ readonly _BLUE='\033[1;34m'
 readonly _GREEN='\033[1;32m'
 readonly _CLEAN='\033[0m'
 
-readonly _API_URL='https://corona.lmao.ninja'
+readonly _API_URL='https://corona.lmao.ninja/v2'
 readonly _date=$(date +"%d/%m/%Y %H:%M")
 
 declare -A _data
