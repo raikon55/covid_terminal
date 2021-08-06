@@ -5,7 +5,7 @@
 ## Busca e exibe na tela dados sobre o virus SARS-COV-2 (COVID-19)
 ##
 ## Eduardo Lopes
-## Versão 0.4
+## Versão 0.4.1
 #####
 
 readonly _RED='\033[1;31m'
@@ -13,7 +13,7 @@ readonly _BLUE='\033[1;34m'
 readonly _GREEN='\033[1;32m'
 readonly _CLEAN='\033[0m'
 
-readonly _API_URL='https://corona.lmao.ninja/v2'
+readonly _API_URL='https://disease.sh/v3/covid-19'
 readonly _date=$(date +"%d/%m/%Y %H:%M")
 
 declare -A _data
@@ -101,7 +101,7 @@ options() {
         ;;
 
         *)
-            printf "$_REDÉ necessário informar argumentos válidos$_CLEAN"
+            printf "${_RED}É necessário informar argumentos válidos${_CLEAN}"
             help
             exit 1
         ;;
